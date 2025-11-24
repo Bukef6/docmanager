@@ -21,10 +21,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 // create uploads if not exists
-const uploadsPath = path.join(__dirname, "uploads");
+const uploadsPath = path.join(__dirname, "..", "uploads");
 if (!fs.existsSync(uploadsPath)) {
   fs.mkdirSync(uploadsPath, { recursive: true });
-  console.log("Uploads folder created ✔️");
+  console.log("Uploads folder created");
 }
 
 // ROUTES
