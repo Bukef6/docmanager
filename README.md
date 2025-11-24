@@ -21,8 +21,8 @@ Before you begin, ensure you have installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone
-cd
+git clone https://github.com/Bukef6/docmanager.git
+cd docmanager
 ```
 
 ### 2. Start MySQL Database from backend
@@ -39,8 +39,6 @@ docker-compose ps
 ### 3. Setup Backend
 
 ```bash
-cd docmanager-backend
-
 # Install dependencies
 npm install
 
