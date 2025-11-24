@@ -12,21 +12,20 @@ import {
   STORAGE_KEY_CURRENT_PAGE,
   STORAGE_KEY_ITEMS_PER_PAGE,
   STORAGE_KEY_TAG_FILTER,
+  STORAGE_KEY_SEARCH,
 } from "../constants/storageKeys";
 import type { DocumentApi, DocumentItem } from "../types";
 import { PAGE_SIZES } from "../constants/pageSizes";
 import { useDeleteDocument } from "../hooks/useDeleteDocument";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import Button from "../components/ui/Button";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Documents() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
   const [editOpen, setEditOpen] = useState(false);
-  const [selected, setSelected] = useState<null | {
-    id: number;
-    title: string;
-    tag: string;
-  }>(null);
+  const [selected, setSelected] = useState<DocumentItem | null>(null);
   const [docForDelete, setDocForDelete] = useState<DocumentItem | null>(null);
 
   const { mutate: updateDocument } = useUpdateDocument();
@@ -34,6 +33,9 @@ export default function Documents() {
 
   const [selectedTag, setSelectedTag] = useState(() => {
     return sessionStorage.getItem(STORAGE_KEY_TAG_FILTER) || "All";
+  });
+  const [searched, setSearched] = useState(() => {
+    return sessionStorage.getItem(STORAGE_KEY_SEARCH) || "";
   });
 
   const [page, setPage] = useState(() => {
@@ -45,50 +47,46 @@ export default function Documents() {
     const saved = sessionStorage.getItem(STORAGE_KEY_ITEMS_PER_PAGE);
     return saved ? parseInt(saved, 10) : PAGE_SIZES[0];
   });
+
   const [itemsPerPage, setItemsPerPage] = useState(() => {
     const saved = sessionStorage.getItem(STORAGE_KEY_ITEMS_PER_PAGE);
     return saved ? parseInt(saved) : 10;
   });
-
-  // Check authentication
-  const { data: authData, isLoading: authLoading } = useQuery({
-    queryKey: ["/auth/me"],
-    queryFn: async () => {
-      const res = await api.get("/auth/me");
-      return res.data;
-    },
-    retry: false,
-  });
-
-  useEffect(() => {
-    if (!authLoading && !authData) {
-      setLocation("/login");
-    }
-  }, [authData, authLoading, setLocation]);
-
-  useEffect(() => {
-    sessionStorage.setItem(STORAGE_KEY_CURRENT_PAGE, "1");
-    setPage(1);
-  }, [selectedTag]);
 
   const {
     data: ApiDocuments,
     isLoading,
     error,
   } = useQuery<DocumentApi>({
-    queryKey: ["/documents", selectedTag, page, itemsPerPage],
+    queryKey: [
+      "/documents",
+      user?.id,
+      selectedTag,
+      searched,
+      page,
+      itemsPerPage,
+    ],
     queryFn: async () => {
       const res = await api.get<DocumentApi>("/documents", {
         params: {
           page: page,
           pageSize: itemsPerPage,
           tag: selectedTag,
+          search: searched,
         },
       });
       return res.data;
     },
     placeholderData: (prev) => prev,
+    enabled: !!user, // after user is loaded
   });
+
+  useEffect(() => {
+    if (page !== 1) {
+      sessionStorage.setItem(STORAGE_KEY_CURRENT_PAGE, "1");
+      setPage(1);
+    }
+  }, [selectedTag, searched]);
 
   if (!ApiDocuments && isLoading) return <div>Loading...</div>;
   if (error)
@@ -104,7 +102,7 @@ export default function Documents() {
     );
 
   //Dialog for edit
-  const handleEdit = (doc: any) => {
+  const handleEdit = (doc: DocumentItem) => {
     setSelected(doc);
     setEditOpen(true);
   };
@@ -127,7 +125,10 @@ export default function Documents() {
       <p className="text-lg text-gray-500">
         Manage and organize your documents
       </p>
-      <DocumentFilters onChangeTag={(t) => setSelectedTag(t)} />
+      <DocumentFilters
+        onChangeTag={(t) => setSelectedTag(t)}
+        onSearchChange={(s) => setSearched(s)}
+      />
       <DataTable
         data={ApiDocuments?.documents ?? ([] as DocumentItem[])}
         onEdit={(doc) => handleEdit(doc)}

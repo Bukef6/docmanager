@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import Button from "../ui/Button";
 import UserMenu from "../ui/UserMenu";
-import Logo from "../ui/Logo";
+import NewLogo from "../ui/NewLogo";
 
 interface HeaderProps {
   username: string | null;
@@ -17,12 +17,7 @@ export default function Header({
   return (
     <header className="sticky top-0 z-1050 w-full border-b border-gray-300 bg-gray-100">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Logo />
-          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800">
-            DocManager
-          </h2>
-        </div>
+        <NewLogo className="sm:w-75 w-70" />
 
         <div className="flex items-center gap-1">
           {/* Desktop */}

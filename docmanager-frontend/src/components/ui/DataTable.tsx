@@ -46,7 +46,7 @@ export default function DataTable({
             >
               <td className="p-3">{doc.title}</td>
               <td className="p-3">
-                <Badge variant="blue">{doc.tag}</Badge>
+                <Badge variant="cyan">{doc.tag}</Badge>
               </td>
               <td className="p-3">
                 {new Date(doc.createdAt).toLocaleDateString()}
@@ -81,7 +81,7 @@ export default function DataTable({
                 <FileText className="w-4 h-4 text-muted-foreground" />
                 {doc.title}
               </div>
-              <Badge variant="blue" className="text-sm">
+              <Badge variant="cyan" className="text-sm">
                 {doc.tag}
               </Badge>
             </div>

@@ -1,54 +1,25 @@
-import { useEffect, useState } from "react";
-
 import Header from "./Header";
 import Content from "./Content";
 import { useLocation } from "wouter";
-import api from "../../lib/api";
 import AddDocumentDialog from "../AddDocumentDialog";
 import { TAGS } from "../../constants/tags";
 import { useAddDocument } from "../../hooks/useAddDocument";
-
-interface User {
-  id: number;
-  username: string;
-}
+import { useLogout } from "../../hooks/useLogout";
+import { useAuth } from "../../hooks/useAuth";
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
-  const [isDialogAddDocuOpen, setDialogAddDocuOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [_, setLocation] = useLocation();
+  const { logout } = useLogout();
+  const { user, isLoading } = useAuth();
+  const [location, setLocation] = useLocation();
+  const isDialogAddDocuOpen = location === "/documents/new";
 
   const { mutate: addDocument } = useAddDocument();
 
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await api.get("/auth/me");
-        setUser(res.data.user);
-      } catch (err) {
-        setLocation("/login");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchUser();
-  }, []);
-
-  const logout = async () => {
-    try {
-      await api.post("/auth/logout");
-    } finally {
-      setLocation("/login");
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-600">
         Loading...
@@ -70,14 +41,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <Header
           username={user?.username ?? ""}
           logout={logout}
-          onAddDocument={() => setDialogAddDocuOpen(true)}
+          onAddDocument={() => setLocation("/documents/new")}
         />
         <Content>{children}</Content>
 
         {/* Dialog */}
         <AddDocumentDialog
           isOpen={isDialogAddDocuOpen}
-          onClose={() => setDialogAddDocuOpen(false)}
+          onClose={() => setLocation("/documents")}
           onSubmit={handleAddDocument}
           tags={TAGS}
         />

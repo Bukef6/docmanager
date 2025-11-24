@@ -1,5 +1,6 @@
 import { LogOut } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import Button from "./Button";
 
 interface UserMenuProps {
   name: string;
@@ -10,7 +11,7 @@ export default function UserMenu({ name, onLogout }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Zatvorenie pri kliknutí mimo
+  // close if clicked outside
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -25,8 +26,8 @@ export default function UserMenu({ name, onLogout }: UserMenuProps) {
 
   return (
     <div className="relative" ref={ref}>
-      {/* Invisible button */}
-      <button
+      <Button
+        variant="ghost"
         onClick={() => setOpen((prev) => !prev)}
         className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 transition"
       >
@@ -37,7 +38,7 @@ export default function UserMenu({ name, onLogout }: UserMenuProps) {
         <span className="font-medium text-gray-800 hidden sm:inline">
           {name}
         </span>
-      </button>
+      </Button>
 
       {open && (
         <div className="absolute right-0 mt-2 w-40 bg-gray-200 shadow-lg rounded-lg  py-2 z-50">
@@ -46,15 +47,16 @@ export default function UserMenu({ name, onLogout }: UserMenuProps) {
               My Account
             </span>
           </div>
-          <button
+          <Button
+            variant="ghost"
             onClick={onLogout}
-            className="w-full text-left px-4 py-2 mt-2 hover:bg-gray-300 text-gray-600"
+            className="w-full text-left px-4 py-2 mt-2 hover:bg-cyan-600 text-gray-600 hover:text-white"
           >
             <div className="flex items-center gap-2">
-              <LogOut className="text-gray-600 p-2 rounded-md" size={32} />
+              <LogOut className=" p-2 rounded-md " size={32} />
               <span>Logout</span>
             </div>
-          </button>
+          </Button>
         </div>
       )}
     </div>

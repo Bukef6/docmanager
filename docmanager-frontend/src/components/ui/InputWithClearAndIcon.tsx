@@ -1,5 +1,6 @@
 import React from "react";
 import { Search, X } from "lucide-react";
+import Button from "./Button";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
@@ -29,13 +30,13 @@ export default function InputWithClearAndIcon({
           {...props}
         />
         {value && (
-          <button
-            type="button"
+          <Button
+            variant="ghostNarrow"
             onClick={onClear}
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         )}
       </div>
       {error && <span className="text-red-500 text-sm">{error}</span>}

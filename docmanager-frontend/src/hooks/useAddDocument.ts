@@ -27,7 +27,7 @@ export const useAddDocument = () => {
     },
     onSuccess: () => {
       toast.success("Document added");
-      // Refreshn docs
+      // Refresh docs
       queryClient.invalidateQueries({
         queryKey: ["/documents"],
       });

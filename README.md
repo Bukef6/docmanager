@@ -79,3 +79,122 @@ Frontend will run on `http://localhost:5173`
 ### 5. Open Application
 
 Open your browser and navigate to `http://localhost:5173`
+
+## Useful Commands
+
+To generate a secure JWT secret:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+### Docker
+
+```bash
+# Start MySQL
+docker-compose up -d
+
+# Stop MySQL
+docker-compose down
+
+# View logs
+docker-compose logs -f mysql
+
+# Reset database (⚠️ deletes all data)
+docker-compose down -v
+docker-compose up -d
+```
+
+### Backend
+
+```bash
+cd docmanager-backend
+
+# Development
+npm run dev
+
+# Database migrations
+npx prisma migrate dev
+
+# View database in Prisma Studio
+npx prisma studio
+
+# Generate Prisma Client
+npx prisma generate
+```
+
+### Frontend
+
+```bash
+cd docmanager-frontend
+
+# Development
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Troubleshooting
+
+### MySQL Connection Issues
+
+```bash
+# Check if MySQL is running
+docker-compose ps
+
+# Restart MySQL
+docker-compose restart mysql
+
+# Check logs
+docker-compose logs mysql
+```
+
+### Port Already in Use
+
+If port 3306 (MySQL), 3000 (backend), or 5173 (frontend) is already in use:
+
+**MySQL**: Edit `docker-compose.yml` and change ports:
+
+```yaml
+ports:
+  - "3307:3306" # Use 3307 instead
+```
+
+**Backend**: Change PORT in `.env`:
+
+```env
+PORT=3001
+```
+
+**Frontend**: Add to `vite.config.ts`:
+
+```ts
+export default defineConfig({
+  server: {
+    port: 5174,
+  },
+});
+```
+
+### Prisma Issues
+
+```bash
+# Regenerate Prisma Client
+cd docmanager-backend
+npx prisma generate
+
+# Reset database
+npx prisma migrate reset
+```
+
+## Development Workflow
+
+1. Make sure Docker MySQL is running
+2. Start backend: `cd docmanager-backend && npm run dev`
+3. Start frontend: `cd docmanager-frontend && npm run dev`
+4. Make changes and test
+5. Commit changes to git

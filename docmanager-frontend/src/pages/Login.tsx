@@ -5,11 +5,12 @@ import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import FormGroup from "../components/ui/FormGroup";
 import api from "../lib/api";
-//import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
-  const [_, setLocation] = useLocation();
-  //const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -20,9 +21,11 @@ export default function LoginPage() {
 
     try {
       await api.post("/auth/login", { username, password });
+      await queryClient.invalidateQueries();
       setLocation("/documents"); // redirect if success
     } catch (err: any) {
-      console.log(err.response?.data?.message || "Chyba pri prihlasovaní");
+      toast.error(err.response?.data?.message || "Error during login");
+      //console.log(err.response?.data?.message || "Chyba pri prihlasovaní");
     } finally {
       setIsLoading(false);
     }

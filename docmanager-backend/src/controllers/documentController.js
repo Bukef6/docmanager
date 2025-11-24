@@ -18,12 +18,28 @@ exports.getDocuments = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const pageSize = parseInt(req.query.pageSize) || 10;
 
-  const { tag } = req.query;
+  const { tag, search } = req.query;
 
   const where = {
     ownerId: userId,
     ...(!tag || tag === "All" ? {} : { tag }),
   };
+
+  if (search && search.trim() !== "") {
+    const s = search.trim();
+
+    if (s.length < 3) {
+      where.title = {
+        startsWith: s,
+        // mode: "insensitive",
+      };
+    } else {
+      where.title = {
+        contains: s,
+        //mode: "insensitive",
+      };
+    }
+  }
 
   const { limit, offset } = paginate(page, pageSize);
 

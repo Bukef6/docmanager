@@ -2,11 +2,16 @@ import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import FormGroup from "../components/ui/FormGroup";
 import { Link, useLocation } from "wouter";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AuthLayout from "../components/AuthLayout";
+import toast from "react-hot-toast";
+import api from "../lib/api";
+import { validatePassword } from "../lib/passwordRules";
 
 export default function Register() {
-  const [_, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     username: "",
@@ -14,16 +19,42 @@ export default function Register() {
     confirm: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const err = validatePassword(form.password);
+    setError(err);
+  }, [form.password]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (form.password !== form.confirm) {
-      alert("Heslá sa nezhodujú");
+    const pwdError = validatePassword(form.password);
+    if (pwdError) {
+      setError(pwdError);
       return;
     }
 
-    // SEM pôjde API register
-    setLocation("/login");
+    if (form.password.length < 5) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+
+    if (form.password !== form.confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await api.post("/auth/register", {
+        username: form.username,
+        password: form.password,
+      });
+      setLocation("/login"); // redirect if success
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Error during registration");
+      //console.log(err.response?.data?.message || "Chyba pri registrácii");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -54,6 +85,9 @@ export default function Register() {
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
+          {error && (
+            <div className="text-red-600 text-sm text-center">{error}</div>
+          )}
         </FormGroup>
 
         <FormGroup label="Repeat password" htmlFor="confirm">
@@ -66,8 +100,8 @@ export default function Register() {
           />
         </FormGroup>
 
-        <Button type="submit" variant="primary">
-          Register
+        <Button type="submit" variant="primary" disabled={isLoading}>
+          {isLoading ? "Registering..." : "Register"}
         </Button>
 
         <div className="text-center text-sm text-gray-600">

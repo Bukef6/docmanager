@@ -25,7 +25,6 @@ export const useUpdateDocument = () => {
       toast.success("Document uploaded");
       queryClient.invalidateQueries({
         queryKey: ["/documents"],
-        //exact: true,
       });
     },
     onError: (error: any) => {
