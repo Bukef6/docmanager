@@ -20,6 +20,7 @@ import { useDeleteDocument } from "../hooks/useDeleteDocument";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import Button from "../components/ui/Button";
 import { useAuth } from "../hooks/useAuth";
+import axios from "axios";
 
 export default function Documents() {
   const [, setLocation] = useLocation();
@@ -95,17 +96,22 @@ export default function Documents() {
   }, [selectedTag, searched]);
 
   if (!ApiDocuments && isLoading) return <div>Loading...</div>;
-  if (error)
+  if (error) {
+    const errorMessage = axios.isAxiosError(error)
+      ? error.response?.data?.message || error.message
+      : "Unknown error";
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
         <span className="text-lg text-gray-600">
           Error while loading.. Try to login again.
         </span>
+        <span>({errorMessage})</span>
         <Button variant="primary" onClick={() => setLocation("/login")}>
           Log in
         </Button>
       </div>
     );
+  }
 
   const handleSubmit = (data: { title: string; tag: string }) => {
     if (!selectedDocument) return;
