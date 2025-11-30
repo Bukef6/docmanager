@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import MainLayout from "../components/layout/MainLayout";
 import api from "../lib/api";
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import DataTable from "../components/ui/DataTable";
 import Paginator from "../components/ui/Paginator";
 import { EditDocumentDialog } from "../components/EditDocumentDialog";
@@ -23,9 +23,8 @@ import { useAuth } from "../hooks/useAuth";
 
 export default function Documents() {
   const [, setLocation] = useLocation();
+  const [match, params] = useRoute("/documents/:id/edit");
   const { user } = useAuth();
-  const [editOpen, setEditOpen] = useState(false);
-  const [selected, setSelected] = useState<DocumentItem | null>(null);
   const [docForDelete, setDocForDelete] = useState<DocumentItem | null>(null);
 
   const { mutate: updateDocument } = useUpdateDocument();
@@ -52,6 +51,9 @@ export default function Documents() {
     const saved = sessionStorage.getItem(STORAGE_KEY_ITEMS_PER_PAGE);
     return saved ? parseInt(saved) : 10;
   });
+
+  const editing = match;
+  const documentId = params?.id;
 
   const {
     data: ApiDocuments,
@@ -81,6 +83,10 @@ export default function Documents() {
     enabled: !!user, // after user is loaded
   });
 
+  const selectedDocument = ApiDocuments?.documents.find(
+    (d) => d.id === Number(documentId)
+  );
+
   useEffect(() => {
     if (page !== 1) {
       sessionStorage.setItem(STORAGE_KEY_CURRENT_PAGE, "1");
@@ -101,15 +107,9 @@ export default function Documents() {
       </div>
     );
 
-  //Dialog for edit
-  const handleEdit = (doc: DocumentItem) => {
-    setSelected(doc);
-    setEditOpen(true);
-  };
-
   const handleSubmit = (data: { title: string; tag: string }) => {
-    if (!selected) return;
-    updateDocument({ id: selected.id, ...data });
+    if (!selectedDocument) return;
+    updateDocument({ id: selectedDocument.id, ...data });
   };
 
   const handleDelete = (id: number) => {
@@ -131,7 +131,7 @@ export default function Documents() {
       />
       <DataTable
         data={ApiDocuments?.documents ?? ([] as DocumentItem[])}
-        onEdit={(doc) => handleEdit(doc)}
+        onEdit={(doc) => setLocation(`/documents/${doc.id}/edit`)}
         onDelete={(doc) => setDocForDelete(doc)}
         onDownload={(doc) =>
           window.open(
@@ -141,10 +141,10 @@ export default function Documents() {
         }
       />
       <EditDocumentDialog
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
+        open={editing}
+        onClose={() => setLocation("/documents")}
         onSubmit={handleSubmit}
-        document={selected}
+        document={selectedDocument || null}
       />
       <ConfirmModal
         isOpen={docForDelete !== null}

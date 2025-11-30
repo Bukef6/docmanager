@@ -15,6 +15,7 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/documents" component={Documents} />
       <Route path="/documents/new" component={Documents} />
+      <Route path="/documents/:id/edit" component={Documents} />
       <Route component={() => <Redirect to="/login" />} />
     </Switch>
   );
