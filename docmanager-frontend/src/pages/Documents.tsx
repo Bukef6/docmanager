@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import MainLayout from "../components/layout/MainLayout";
 import api from "../lib/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRoute, useLocation } from "wouter";
 import DataTable from "../components/ui/DataTable";
 import Paginator from "../components/ui/Paginator";
@@ -88,13 +88,6 @@ export default function Documents() {
     (d) => d.id === Number(documentId)
   );
 
-  useEffect(() => {
-    if (page !== 1) {
-      sessionStorage.setItem(STORAGE_KEY_CURRENT_PAGE, "1");
-      setPage(1);
-    }
-  }, [selectedTag, searched]);
-
   if (!ApiDocuments && isLoading) return <div>Loading...</div>;
   if (error) {
     const errorMessage = axios.isAxiosError(error)
@@ -123,6 +116,13 @@ export default function Documents() {
     setDocForDelete(null);
   };
 
+  const resetPageIfNeeded = () => {
+    if (page !== 1) {
+      setPage(1);
+      sessionStorage.setItem(STORAGE_KEY_CURRENT_PAGE, "1");
+    }
+  };
+
   return (
     <MainLayout>
       <h2 className="text-3xl font-semibold mb-1 text-gray-800">
@@ -132,8 +132,14 @@ export default function Documents() {
         Manage and organize your documents
       </p>
       <DocumentFilters
-        onChangeTag={(t) => setSelectedTag(t)}
-        onSearchChange={(s) => setSearched(s)}
+        onChangeTag={(t) => {
+          setSelectedTag(t);
+          resetPageIfNeeded();
+        }}
+        onSearchChange={(s) => {
+          setSearched(s);
+          resetPageIfNeeded();
+        }}
       />
       <DataTable
         data={ApiDocuments?.documents ?? ([] as DocumentItem[])}

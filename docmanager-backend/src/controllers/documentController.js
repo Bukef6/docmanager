@@ -31,12 +31,10 @@ exports.getDocuments = async (req, res) => {
     if (s.length < 3) {
       where.title = {
         startsWith: s,
-        // mode: "insensitive",
       };
     } else {
       where.title = {
         contains: s,
-        //mode: "insensitive",
       };
     }
   }

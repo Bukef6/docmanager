@@ -7,6 +7,7 @@ import AuthLayout from "../components/AuthLayout";
 import toast from "react-hot-toast";
 import api from "../lib/api";
 import { validatePassword } from "../lib/passwordRules";
+import type { AxiosError } from "axios";
 
 export default function Register() {
   const [, setLocation] = useLocation();
@@ -49,8 +50,13 @@ export default function Register() {
         password: form.password,
       });
       setLocation("/login"); // redirect if success
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Error during registration");
+    } catch (err: unknown) {
+      const error = err as AxiosError<{ message: string }>;
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Error during registration"
+      );
       //console.log(err.response?.data?.message || "Chyba pri registrácii");
     } finally {
       setIsLoading(false);

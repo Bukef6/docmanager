@@ -7,6 +7,7 @@ import FormGroup from "../components/ui/FormGroup";
 import api from "../lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import type { AxiosError } from "axios";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -23,9 +24,11 @@ export default function LoginPage() {
       await api.post("/auth/login", { username, password });
       await queryClient.invalidateQueries();
       setLocation("/documents"); // redirect if success
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Error during login");
-      //console.log(err.response?.data?.message || "Chyba pri prihlasovaní");
+    } catch (err: unknown) {
+      const error = err as AxiosError<{ message: string }>;
+      toast.error(
+        error.response?.data?.message || error.message || "Error during login"
+      );
     } finally {
       setIsLoading(false);
     }
