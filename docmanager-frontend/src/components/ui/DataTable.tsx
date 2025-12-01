@@ -4,6 +4,7 @@ import Badge from "../ui/Badge";
 import Button from "./Button";
 import { TAGS } from "../../constants/tags";
 import { VARIANT_KEYS, type VARIANTS } from "../../constants/variants";
+import { SortableTableHeader } from "./SortableTableHeader";
 
 interface DataTableProps {
   data: DocumentItem[];
@@ -40,10 +41,11 @@ export default function DataTable({
       <table className="w-full border-collapse hidden sm:table">
         <thead>
           <tr className="bg-gray-100 text-left ">
-            <th className="p-3 ">Name</th>
-            <th className="p-3">Tag</th>
-            <th className="p-3">Upload Date</th>
-            <th className="p-3">Size</th>
+            <SortableTableHeader label="Name" orderKey="title" />
+            <SortableTableHeader label="Tag" orderKey="tag" />
+            <SortableTableHeader label="Upload Date" orderKey="createdAt" />
+            <SortableTableHeader label="Size" orderKey="size" />
+
             <th className="p-3 text-right">Actions</th>
           </tr>
         </thead>

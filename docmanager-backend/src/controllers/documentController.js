@@ -18,7 +18,7 @@ exports.getDocuments = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const pageSize = parseInt(req.query.pageSize) || 10;
 
-  const { tag, search } = req.query;
+  const { tag, search, orderBy, asc } = req.query;
 
   const where = {
     ownerId: userId,
@@ -41,11 +41,14 @@ exports.getDocuments = async (req, res) => {
 
   const { limit, offset } = paginate(page, pageSize);
 
+  const sortColumn = orderBy || "createdAt";
+  const sortDirection = asc === "false" ? "desc" : "asc";
+
   const documents = await prisma.document.findMany({
     where,
     skip: offset,
     take: limit,
-    orderBy: { createdAt: "desc" },
+    orderBy: { [sortColumn]: sortDirection },
   });
 
   const total = await prisma.document.count({ where });

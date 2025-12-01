@@ -21,6 +21,8 @@ import ConfirmModal from "../components/ui/ConfirmModal";
 import Button from "../components/ui/Button";
 import { useAuth } from "../hooks/useAuth";
 import axios from "axios";
+import type { RootState } from "../lib/store";
+import { useSelector } from "react-redux";
 
 export default function Documents() {
   const [, setLocation] = useLocation();
@@ -56,6 +58,8 @@ export default function Documents() {
   const editing = match;
   const documentId = params?.id;
 
+  const { orderBy, asc } = useSelector((state: RootState) => state.sorting);
+
   const {
     data: ApiDocuments,
     isLoading,
@@ -68,6 +72,8 @@ export default function Documents() {
       searched,
       page,
       itemsPerPage,
+      orderBy,
+      asc,
     ],
     queryFn: async () => {
       const res = await api.get<DocumentApi>("/documents", {
@@ -76,6 +82,8 @@ export default function Documents() {
           pageSize: itemsPerPage,
           tag: selectedTag,
           search: searched,
+          orderBy: orderBy,
+          asc: asc,
         },
       });
       return res.data;
