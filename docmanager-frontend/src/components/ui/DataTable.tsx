@@ -2,6 +2,8 @@ import { Download, Edit, FileText, Trash2 } from "lucide-react";
 import type { DocumentItem } from "../../types";
 import Badge from "../ui/Badge";
 import Button from "./Button";
+import { TAGS } from "../../constants/tags";
+import { VARIANT_KEYS, type VARIANTS } from "../../constants/variants";
 
 interface DataTableProps {
   data: DocumentItem[];
@@ -16,21 +18,29 @@ export default function DataTable({
   onDelete,
   onDownload,
 }: DataTableProps) {
-  function formatBytes(bytes: number) {
+  const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 B";
     const k = 1024;
     const sizes = ["B", "KB", "MB", "GB", "TB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  }
+  };
+
+  const getVariantForTag = (tag: string) => {
+    const index = TAGS.indexOf(tag);
+
+    if (index === -1) return "default";
+
+    return VARIANT_KEYS[index % VARIANT_KEYS.length] as keyof typeof VARIANTS;
+  };
 
   return (
     <div className="bg-white shadow rounded-lg p-4">
       {/* DESKTOP TABLE */}
       <table className="w-full border-collapse hidden sm:table">
         <thead>
-          <tr className="bg-gray-100 text-left">
-            <th className="p-3">Name</th>
+          <tr className="bg-gray-100 text-left ">
+            <th className="p-3 ">Name</th>
             <th className="p-3">Tag</th>
             <th className="p-3">Upload Date</th>
             <th className="p-3">Size</th>
@@ -46,7 +56,7 @@ export default function DataTable({
             >
               <td className="p-3">{doc.title}</td>
               <td className="p-3">
-                <Badge variant="cyan">{doc.tag}</Badge>
+                <Badge variant={getVariantForTag(doc.tag)}>{doc.tag}</Badge>
               </td>
               <td className="p-3">
                 {new Date(doc.createdAt).toLocaleDateString()}
@@ -81,7 +91,7 @@ export default function DataTable({
                 <FileText className="w-4 h-4 text-muted-foreground" />
                 {doc.title}
               </div>
-              <Badge variant="cyan" className="text-sm">
+              <Badge variant={getVariantForTag(doc.tag)} className="text-sm">
                 {doc.tag}
               </Badge>
             </div>
