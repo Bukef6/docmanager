@@ -5,6 +5,8 @@ import Button from "./Button";
 import { TAGS } from "../../constants/tags";
 import { VARIANT_KEYS, type VARIANTS } from "../../constants/variants";
 import { SortableTableHeader } from "./SortableTableHeader";
+import { MobileSortMenu } from "./MobileSortMenu";
+import { SORT_OPTIONS } from "../../constants/sortOptions";
 
 interface DataTableProps {
   data: DocumentItem[];
@@ -41,10 +43,13 @@ export default function DataTable({
       <table className="w-full border-collapse hidden sm:table">
         <thead>
           <tr className="bg-gray-100 text-left ">
-            <SortableTableHeader label="Name" orderKey="title" />
-            <SortableTableHeader label="Tag" orderKey="tag" />
-            <SortableTableHeader label="Upload Date" orderKey="createdAt" />
-            <SortableTableHeader label="Size" orderKey="size" />
+            {SORT_OPTIONS.map((opt) => (
+              <SortableTableHeader
+                key={opt.key}
+                label={opt.label}
+                orderKey={opt.key}
+              />
+            ))}
 
             <th className="p-3 text-right">Actions</th>
           </tr>
@@ -80,6 +85,8 @@ export default function DataTable({
         </tbody>
       </table>
 
+      {/* MOBILE SORTING */}
+      <MobileSortMenu />
       {/* MOBILE LISTVIEW */}
       <div className="sm:hidden space-y-3">
         {data.map((doc) => (

@@ -6,7 +6,7 @@ interface SortingState {
 }
 
 const initialState: SortingState = {
-  orderBy: "",
+  orderBy: "createdAt",
   asc: true,
 };
 

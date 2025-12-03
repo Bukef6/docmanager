@@ -1,6 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
 import MainLayout from "../components/layout/MainLayout";
-import api from "../lib/api";
 import { useState } from "react";
 import { useRoute, useLocation } from "wouter";
 import DataTable from "../components/ui/DataTable";
@@ -8,13 +6,14 @@ import Paginator from "../components/ui/Paginator";
 import { EditDocumentDialog } from "../components/EditDocumentDialog";
 import { useUpdateDocument } from "../hooks/useUpdateDocument";
 import { DocumentFilters } from "../components/ui/DocumentFilters";
-import type { DocumentApi, DocumentItem } from "../types";
+import type { DocumentItem } from "../types";
 import { useDeleteDocument } from "../hooks/useDeleteDocument";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import Button from "../components/ui/Button";
 import { useAuth } from "../hooks/useAuth";
 import { useSelector } from "react-redux";
 import type { RootState } from "../lib/store";
+import { useGetDocuments } from "../hooks/useGetDocuments";
 
 export default function Documents() {
   const [, setLocation] = useLocation();
@@ -36,32 +35,14 @@ export default function Documents() {
     data: ApiDocuments,
     isLoading,
     error,
-  } = useQuery<DocumentApi>({
-    queryKey: [
-      "/documents",
-      user?.id,
-      tag,
-      search,
-      page,
-      pageSize,
-      orderBy,
-      asc,
-    ],
-    queryFn: async () => {
-      const res = await api.get<DocumentApi>("/documents", {
-        params: {
-          page: page,
-          pageSize: pageSize,
-          tag: tag,
-          search: search,
-          orderBy: orderBy,
-          asc: asc,
-        },
-      });
-      return res.data;
-    },
-    placeholderData: (prev) => prev,
-    enabled: !!user, // after user is loaded
+  } = useGetDocuments({
+    userId: user?.id,
+    tag,
+    search,
+    page,
+    pageSize,
+    orderBy,
+    asc,
   });
 
   const selectedDocument = ApiDocuments?.documents.find(
