@@ -1,39 +1,32 @@
 import React from "react";
 import { PAGE_SIZES } from "../../constants/pageSizes";
-import {
-  STORAGE_KEY_CURRENT_PAGE,
-  STORAGE_KEY_ITEMS_PER_PAGE,
-} from "../../constants/storageKeys";
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Button from "./Button";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { setPage, setPageSize } from "../../features/pagingSlice";
 
 interface PaginatorProps {
   totalItems: number;
-  currentPage: number;
-  pageSize: number;
-  onPageChange?: (page: number, pageSize: number) => void;
 }
 
-const Paginator: React.FC<PaginatorProps> = ({
-  totalItems,
-  currentPage,
-  pageSize,
-  onPageChange,
-}) => {
+const Paginator: React.FC<PaginatorProps> = ({ totalItems }) => {
+  const dispatch = useAppDispatch();
+  const currentPage = useAppSelector((state) => state.paging.page);
+  const pageSize = useAppSelector((state) => state.paging.pageSize);
   const totalPages = Math.ceil(totalItems / pageSize);
 
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
   const handlePageChange = (page: number) => {
-    sessionStorage.setItem(STORAGE_KEY_CURRENT_PAGE, page.toString());
-    onPageChange?.(page, pageSize);
+    dispatch(setPage(page));
   };
 
   const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newSize = parseInt(e.target.value);
-    sessionStorage.setItem(STORAGE_KEY_ITEMS_PER_PAGE, newSize.toString());
-    onPageChange?.(1, newSize);
+    dispatch(setPageSize(newSize));
+    dispatch(setPage(1));
   };
 
   const renderPageNumbers = () => {

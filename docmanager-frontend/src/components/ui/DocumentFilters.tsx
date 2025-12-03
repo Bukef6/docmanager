@@ -1,41 +1,36 @@
-import { useEffect, useState } from "react";
-import { STORAGE_KEY_TAG_FILTER } from "../../constants/storageKeys";
-import { STORAGE_KEY_SEARCH } from "../../constants/storageKeys";
 import { TagSelect } from "../dialog/TagSelect";
 import { InputWithLabelPosition } from "./InputWithLabelPosition";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { setSearch, setTag } from "../../features/filterSlice";
+import { setPage } from "../../features/pagingSlice";
 
-interface DocumentFiltersProps {
-  onChangeTag: (tag: string) => void;
-  onSearchChange: (search: string) => void;
-}
+export const DocumentFilters = () => {
+  const dispatch = useAppDispatch();
+  const tag = useAppSelector((state) => state.filters.tag);
+  const search = useAppSelector((state) => state.filters.search);
+  const page = useAppSelector((state) => state.paging.page);
 
-export const DocumentFilters = ({
-  onChangeTag,
-  onSearchChange,
-}: DocumentFiltersProps) => {
-  const [tag, setTag] = useState(
-    sessionStorage.getItem(STORAGE_KEY_TAG_FILTER) || "All"
-  );
-  const [search, setSearch] = useState(
-    sessionStorage.getItem(STORAGE_KEY_SEARCH) || ""
-  );
+  const resetPageIfNeeded = () => {
+    if (page !== 1) {
+      dispatch(setPage(1));
+    }
+  };
+  const handleTagChange = (value: string) => {
+    dispatch(setTag(value));
+    resetPageIfNeeded();
+  };
 
-  useEffect(() => {
-    sessionStorage.setItem(STORAGE_KEY_TAG_FILTER, tag);
-    onChangeTag(tag);
-  }, [tag]);
-
-  useEffect(() => {
-    sessionStorage.setItem(STORAGE_KEY_SEARCH, search);
-    onSearchChange(search);
-  }, [search]);
+  const handleSearchChange = (value: string) => {
+    dispatch(setSearch(value));
+    resetPageIfNeeded();
+  };
 
   return (
     <div className="flex items-center gap-4  p-3 mt-3 rounded  mb-4">
-      <TagSelect all={true} value={tag} onChange={setTag} />
+      <TagSelect all={true} value={tag} onChange={handleTagChange} />
       <InputWithLabelPosition
         value={search}
-        onChange={setSearch}
+        onChange={handleSearchChange}
         placeholder="Search the name"
         label="Search"
       />

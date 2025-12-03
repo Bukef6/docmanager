@@ -3,7 +3,7 @@ import LogoSrc from "../../assets/logo_4.svg";
 import { cn } from "../../lib/utils";
 
 export default function NewLogo({ className = "" }) {
-  const base = "relative  flex items-center justify-center overflow-hidden";
+  const base = "relative flex items-center justify-center overflow-hidden";
   return (
     <div className={cn(base, className)}>
       <img src={LogoSrc} className="p-2" alt="Logo" />

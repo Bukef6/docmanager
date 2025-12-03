@@ -8,21 +8,13 @@ import Paginator from "../components/ui/Paginator";
 import { EditDocumentDialog } from "../components/EditDocumentDialog";
 import { useUpdateDocument } from "../hooks/useUpdateDocument";
 import { DocumentFilters } from "../components/ui/DocumentFilters";
-import {
-  STORAGE_KEY_CURRENT_PAGE,
-  STORAGE_KEY_ITEMS_PER_PAGE,
-  STORAGE_KEY_TAG_FILTER,
-  STORAGE_KEY_SEARCH,
-} from "../constants/storageKeys";
 import type { DocumentApi, DocumentItem } from "../types";
-import { PAGE_SIZES } from "../constants/pageSizes";
 import { useDeleteDocument } from "../hooks/useDeleteDocument";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import Button from "../components/ui/Button";
 import { useAuth } from "../hooks/useAuth";
-import axios from "axios";
-import type { RootState } from "../lib/store";
 import { useSelector } from "react-redux";
+import type { RootState } from "../lib/store";
 
 export default function Documents() {
   const [, setLocation] = useLocation();
@@ -33,32 +25,12 @@ export default function Documents() {
   const { mutate: updateDocument } = useUpdateDocument();
   const deleteMutation = useDeleteDocument();
 
-  const [selectedTag, setSelectedTag] = useState(() => {
-    return sessionStorage.getItem(STORAGE_KEY_TAG_FILTER) || "All";
-  });
-  const [searched, setSearched] = useState(() => {
-    return sessionStorage.getItem(STORAGE_KEY_SEARCH) || "";
-  });
-
-  const [page, setPage] = useState(() => {
-    const saved = sessionStorage.getItem(STORAGE_KEY_CURRENT_PAGE);
-    return saved ? parseInt(saved) : 1;
-  });
-
-  const [pageSize, setPageSize] = useState(() => {
-    const saved = sessionStorage.getItem(STORAGE_KEY_ITEMS_PER_PAGE);
-    return saved ? parseInt(saved, 10) : PAGE_SIZES[0];
-  });
-
-  const [itemsPerPage, setItemsPerPage] = useState(() => {
-    const saved = sessionStorage.getItem(STORAGE_KEY_ITEMS_PER_PAGE);
-    return saved ? parseInt(saved) : 10;
-  });
-
   const editing = match;
   const documentId = params?.id;
 
   const { orderBy, asc } = useSelector((state: RootState) => state.sorting);
+  const { tag, search } = useSelector((state: RootState) => state.filters);
+  const { page, pageSize } = useSelector((state: RootState) => state.paging);
 
   const {
     data: ApiDocuments,
@@ -68,10 +40,10 @@ export default function Documents() {
     queryKey: [
       "/documents",
       user?.id,
-      selectedTag,
-      searched,
+      tag,
+      search,
       page,
-      itemsPerPage,
+      pageSize,
       orderBy,
       asc,
     ],
@@ -79,9 +51,9 @@ export default function Documents() {
       const res = await api.get<DocumentApi>("/documents", {
         params: {
           page: page,
-          pageSize: itemsPerPage,
-          tag: selectedTag,
-          search: searched,
+          pageSize: pageSize,
+          tag: tag,
+          search: search,
           orderBy: orderBy,
           asc: asc,
         },
@@ -97,22 +69,17 @@ export default function Documents() {
   );
 
   if (!ApiDocuments && isLoading) return <div>Loading...</div>;
-  if (error) {
-    const errorMessage = axios.isAxiosError(error)
-      ? error.response?.data?.message || error.message
-      : "Unknown error";
+  if (error)
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
         <span className="text-lg text-gray-600">
           Error while loading.. Try to login again.
         </span>
-        <span>({errorMessage})</span>
         <Button variant="primary" onClick={() => setLocation("/login")}>
           Log in
         </Button>
       </div>
     );
-  }
 
   const handleSubmit = (data: { title: string; tag: string }) => {
     if (!selectedDocument) return;
@@ -124,13 +91,6 @@ export default function Documents() {
     setDocForDelete(null);
   };
 
-  const resetPageIfNeeded = () => {
-    if (page !== 1) {
-      setPage(1);
-      sessionStorage.setItem(STORAGE_KEY_CURRENT_PAGE, "1");
-    }
-  };
-
   return (
     <MainLayout>
       <h2 className="text-3xl font-semibold mb-1 text-gray-800">
@@ -139,16 +99,7 @@ export default function Documents() {
       <p className="text-lg text-gray-500">
         Manage and organize your documents
       </p>
-      <DocumentFilters
-        onChangeTag={(t) => {
-          setSelectedTag(t);
-          resetPageIfNeeded();
-        }}
-        onSearchChange={(s) => {
-          setSearched(s);
-          resetPageIfNeeded();
-        }}
-      />
+      <DocumentFilters />
       <DataTable
         data={ApiDocuments?.documents ?? ([] as DocumentItem[])}
         onEdit={(doc) => setLocation(`/documents/${doc.id}/edit`)}
@@ -172,16 +123,7 @@ export default function Documents() {
         onCancel={() => setDocForDelete(null)}
         message={`Do you really want to delete file ${docForDelete?.title}?`}
       />
-      <Paginator
-        totalItems={ApiDocuments?.total ?? 0}
-        currentPage={page}
-        pageSize={pageSize}
-        onPageChange={(page, size) => {
-          setItemsPerPage(size);
-          setPage(page);
-          setPageSize(size);
-        }}
-      />
+      <Paginator totalItems={ApiDocuments?.total ?? 0} />
     </MainLayout>
   );
 }

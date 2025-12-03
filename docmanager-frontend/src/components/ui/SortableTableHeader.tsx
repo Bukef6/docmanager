@@ -1,6 +1,6 @@
 import { MoveDown, MoveUp } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { setOrderBy } from "../../features/sorting/sortingSlice";
+import { setOrderBy } from "../../features/sortingSlice";
 import Button from "./Button";
 import type { RootState } from "../../lib/store";
 

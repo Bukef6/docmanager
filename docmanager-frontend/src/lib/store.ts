@@ -1,8 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
-import sortingReducer from "../features/sorting/sortingSlice";
+import filterReducer from "../features/filterSlice";
+import pagingReducer from "../features/pagingSlice";
+import sortingReducer from "../features/sortingSlice";
 
 export const store = configureStore({
   reducer: {
+    filters: filterReducer,
+    paging: pagingReducer,
     sorting: sortingReducer,
   },
 });
